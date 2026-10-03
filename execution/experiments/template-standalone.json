@@ -1,0 +1,32 @@
+{
+  "_comment": "Copy this file before a real run. It is a configuration template and dry-run input; use run-screening.sh directly for real Standalone submissions. Cluster A is worker1 HotSpot/G1. Cluster B is worker2 Semeru/OpenJ9 Balanced with persistent SCC; use standalone_pool 'openj9', gc 'balanced', cores=2, and instances=3. The submit script, not worker Pod environment variables, owns driver/executor JVM tuning.",
+  "parallelism": 1,
+  "experiments": [
+    {
+      "_comment": "Do not treat worker1 G1 and worker2 OpenJ9 as a same-node performance baseline. Verify actual executor JVM identity and driver placement from master/worker logs.",
+      "cluster_manager": "standalone",
+      "standalone_pool": "g1",
+      "standalone_local_tunnel": true,
+      "query": "q3",
+      "benchmark": "tpch",
+      "scale": 200,
+      "gc": "g1",
+      "heap": "8g",
+      "cores": 4,
+      "instances": 4,
+      "driver_memory": "4g",
+      "driver_cores": 2,
+      "aqe": false,
+      "broadcast": "off",
+      "jfr": false,
+      "jmx": false,
+      "tag": "replace-me",
+      "conf": {
+        "spark.gcaware.warmup": "0",
+        "spark.gcaware.udf.countCalls": "false",
+        "spark.memory.offHeap.enabled": "false",
+        "spark.dynamicAllocation.enabled": "false"
+      }
+    }
+  ]
+}

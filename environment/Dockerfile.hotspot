@@ -1,0 +1,25 @@
+# HotSpot screening image built from the official Apache Spark image.
+#
+# Build example (amd64):
+#   docker buildx build --platform linux/amd64 -f Dockerfile.hotspot \
+#     -t heterojvm-spark:hotspot-4.1.2 [--build-arg WITH_JUPYTER=1] --load .
+
+FROM apache/spark:4.1.2
+USER root
+
+# --- S3A support used by the submit path ---
+# run-screening.sh reads the workload jar, TPC data, and event logs over s3a://.
+RUN cd /opt/spark/jars \
+ && curl -fsSLO https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.4.2/hadoop-aws-3.4.2.jar \
+ && curl -fsSLO https://repo1.maven.org/maven2/software/amazon/awssdk/bundle/2.29.52/bundle-2.29.52.jar
+
+# --- Python + JupyterLab (optional; only for v1's notebook workflow) ---
+ARG WITH_JUPYTER=0
+RUN if [ "$WITH_JUPYTER" = "1" ]; then \
+      apt-get update \
+   && apt-get install -y --no-install-recommends python3 python3-pip \
+   && rm -rf /var/lib/apt/lists/* \
+   && pip3 install --no-cache-dir --break-system-packages jupyterlab jupyter-server-proxy ; \
+    fi
+
+USER spark

@@ -1,0 +1,22 @@
+# OpenJ9/Semeru milestone variant of the screening image.
+# Starts directly from the official Apache Spark image and swaps the Java runtime.
+FROM apache/spark:4.1.2
+
+USER root
+
+# Match the S3A support added by Dockerfile.hotspot.
+RUN cd /opt/spark/jars \
+ && curl -fsSLO https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.4.2/hadoop-aws-3.4.2.jar \
+ && curl -fsSLO https://repo1.maven.org/maven2/software/amazon/awssdk/bundle/2.29.52/bundle-2.29.52.jar
+
+ARG SEMERU_TARBALL_URL="https://github.com/ibmruntimes/semeru21-binaries/releases/download/jdk-21.0.12.0-m1/ibm-semeru-open-jdk_x64_linux_21.0.12.0-m1.tar.gz"
+
+RUN rm -rf /opt/java/semeru \
+ && mkdir -p /opt/java/semeru \
+ && curl -fsSL "$SEMERU_TARBALL_URL" \
+    | tar -xz --strip-components=1 -C /opt/java/semeru
+
+ENV JAVA_HOME=/opt/java/semeru
+ENV PATH=/opt/java/semeru/bin:$PATH
+
+USER spark
